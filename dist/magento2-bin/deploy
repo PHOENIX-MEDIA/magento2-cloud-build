@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+
+# We want to work on the project root directory
+DIR="$(cd "$(dirname "$0")" && pwd)"
+cd ${DIR}/../
+
+export PROJECT_DOMAIN="${PROJECT}-${ENVIRONMENT}.${SITE_URL}"
+### As we use the previous env variable here we can not put both in one line
+export MAGENTO_CLOUD_ROUTES="$(vendor/bin/ece-tools-get-cloud-routes)"
+
+# If we have the environment variables we need, run deployment.
+if [ ! -z "${MAGENTO_CLOUD_VARIABLES}" ] && [ ! -z "${MAGENTO_CLOUD_RELATIONSHIPS}" ]; then
+
+    # Set fixed install date
+    cat > app/etc/env.php << "SET_INSTALL_DATE"
+<?php
+return [
+    'MAGE_MODE' => 'production',
+    'cache_types' => [
+        'compiled_config' => 1
+    ],
+    'install' => [
+        'date' => 'Tue, 17 Nov 2015 20:16:00 +0000'
+    ],
+    'http_cache_hosts' => [
+        [
+            'host' => 'varnish'
+        ]
+    ]
+];
+SET_INSTALL_DATE
+
+    # Run deployment
+    if [ ! -z "${DEVELOPMENT_ENV}" ]; then
+      vendor/bin/ece-tools deploy
+    elif [[ $(hostname -s) =~ ^magento ]]; then
+      vendor/bin/ece-tools run scenario/deploy.xml vendor/phoenix-media/magento2-ece-tools/scenario/deploy/custom-mode-config.xml vendor/phoenix/magento2-ece-tools/scenario/deploy/no-upgrade.xml
+    elif [[ $(hostname -s) =~ ^cronjob ]]; then
+      vendor/bin/ece-tools run scenario/deploy.xml vendor/phoenix-media/magento2-ece-tools/scenario/deploy/custom-mode-config.xml
+    fi
+
+    # Exit when the deployment failed
+    rc=$?;
+    if [[ $rc != 0 ]]; then
+        echo "Deployment failed. Exiting."
+        exit
+    fi
+fi
+
+# Must we install the sample data ?
+if [ ! -f var/.deployed-container ] && [ ! -z "${ADD_SAMPLE_DATA}" ] && [ ! -z "${COMPOSER_USER}" ] && [ ! -z "${COMPOSER_PASS}" ]; then
+
+    bin/magento deploy:mode:set developer
+
+    if [ ! -z "${NET_RC}" ]; then
+        export HOME=/var/www/html/bin
+        echo -e "${NET_RC}" >> /var/www/html/bin/.netrc && chmod 600 /var/www/html/bin/.netrc
+    fi
+
+    export COMPOSER_NO_INTERACTION=1 COMPOSER_CACHE_DIR="/var/www/html/var/composer_home"
+    composer config http-basic.repo.magento.com "${COMPOSER_USER}" "${COMPOSER_PASS}"
+
+    ### This will remove the autoloader optimization ( composer dump-autoload ), which will run during build.
+    composer install --ignore-platform-reqs
+
+    bin/magento sampledata:deploy
+    bin/magento setup:upgrade || exit 1
+
+    if [ ! -z "${NET_RC}" ]; then
+        export -n HOME
+        rm /var/www/html/bin/.netrc
+    fi
+
+    if [ -z "${DEVELOPMENT_ENV}" ]; then
+        bin/magento deploy:mode:set production || exit 1
+    fi
+
+    ### We dont want to install sample data again as in the demo projects the ENV variable is always set
+    touch var/.deployed-container
+fi
+
+if [ ! -z "${DEVELOPMENT_ENV}" ]; then
+    export COMPOSER_NO_INTERACTION=1 COMPOSER_CACHE_DIR="/var/www/html/var/composer_home"
+    bin/magento deploy:mode:set developer || exit 1
+    composer install --ignore-platform-reqs
+fi
+
+bin/magento cache:enable || exit 1
+
+### We are ready now @see ReadinessProbe of Magento.yaml
+touch /tmp/deployed
