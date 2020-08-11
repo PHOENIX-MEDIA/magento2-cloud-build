@@ -4,7 +4,14 @@
 DIR="$(cd "$(dirname "$0")" && pwd)"
 cd ${DIR}/../
 
-export PROJECT_DOMAIN="${PROJECT}-${ENVIRONMENT}.${SITE_URL}"
+if [ ! -z "${PROJECT}" ] && [ ! -z "${ENVIRONMENT}" ] && [ ! -z "${SITE_URL}" ]; then
+    export PROJECT_DOMAIN="${PROJECT}-${ENVIRONMENT}.${SITE_URL}"
+fi
+
+[[ -z "${PROJECT_DOMAIN}" ]] && { echo "ERROR: Environment variable PROJECT_DOMAIN must not be empty."; exit 1; }
+[[ -z "${MAGENTO_CLOUD_VARIABLES}" ]] && { echo "ERROR: Environment variable MAGENTO_CLOUD_VARIABLES must not be empty."; exit 1; }
+[[ -z "${MAGENTO_CLOUD_RELATIONSHIPS}" ]] && { echo "ERROR: Environment variable MAGENTO_CLOUD_RELATIONSHIPS must not be empty."; exit 1; }
+
 ### As we use the previous env variable here we can not put both in one line
 export MAGENTO_CLOUD_ROUTES="$(vendor/bin/ece-tools-get-cloud-routes)"
 
@@ -31,7 +38,7 @@ return [
 SET_INSTALL_DATE
 
     # Run deployment
-    if [ ! -z "${DEVELOPMENT_ENV}" ]; then
+    if [ ! -z "${DEVELOPMENT_ENV}" ] || [[ ! $(hostname -s) =~ ^(magento|cronjob) ]]; then
       vendor/bin/ece-tools deploy
     elif [[ $(hostname -s) =~ ^magento ]]; then
       vendor/bin/ece-tools run scenario/deploy.xml vendor/phoenix-media/magento2-ece-tools/scenario/deploy/custom-mode-config.xml vendor/phoenix/magento2-ece-tools/scenario/deploy/no-upgrade.xml
