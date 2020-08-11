@@ -11,8 +11,10 @@ if [ $(basename $MAGENTO_ROOT) == "src" ];then
     INSTALL_DIR_SUFFIX=""
 fi
 
+mkdir ${INSTALL_DIR}/helm || true
 chmod a+x ${DIST_DIR}/bin/* ${DIST_DIR}/magento2-bin/*
 cp -a ${DIST_DIR}/bin ${DIST_DIR}/docker ${INSTALL_DIR}${INSTALL_DIR_SUFFIX}/
 cp ${DIST_DIR}/.gitignore ${DIST_DIR}/.dockerignore ${DIST_DIR}/Dockerfile ${INSTALL_DIR}/
 cp -a ${DIST_DIR}/magento-vars.php ${DIST_DIR}/helm ${MAGENTO_ROOT}/
 cp -a ${DIST_DIR}/magento2-bin/* ${MAGENTO_ROOT}/bin/
+cp -a ${DIST_DIR}/helm/* ${INSTALL_DIR}/helm/
