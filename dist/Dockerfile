@@ -1,6 +1,5 @@
 FROM phoenixmedia/nginx-php:7.3
 
-COPY --from=redis:5.0.5-alpine /usr/local/bin/redis-cli /usr/local/bin/redis-cli
 COPY /docker/conf/php/php.ini /etc/php7/php.ini
 COPY --chown=nginx:nginx src/ /var/www/html/
 
