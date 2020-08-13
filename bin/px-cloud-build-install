@@ -12,6 +12,7 @@ if [ $(basename $MAGENTO_ROOT) == "src" ];then
 fi
 
 mkdir ${INSTALL_DIR}/helm || true
+mkdir ${MAGENTO_ROOT}/m2-hotfixes || true
 chmod a+x ${DIST_DIR}/bin/* ${DIST_DIR}/magento2-bin/*
 cp -a ${DIST_DIR}/bin ${DIST_DIR}/docker ${INSTALL_DIR}${INSTALL_DIR_SUFFIX}/
 cp ${DIST_DIR}/.gitignore ${DIST_DIR}/.dockerignore ${DIST_DIR}/Dockerfile ${INSTALL_DIR}/
@@ -19,3 +20,7 @@ cp -a ${DIST_DIR}/magento-vars.php ${DIST_DIR}/helm ${MAGENTO_ROOT}/
 cp -a ${DIST_DIR}/../../magento2-ece-tools/dist/.magento.env.yaml ${MAGENTO_ROOT}/
 cp -a ${DIST_DIR}/magento2-bin/* ${MAGENTO_ROOT}/bin/
 cp -a ${DIST_DIR}/helm/* ${INSTALL_DIR}/helm/
+
+if [ ! -f ${MAGENTO_ROOT}/app/etc/config.php ]; then
+    cp -a ${DIST_DIR}/config.php ${MAGENTO_ROOT}/app/etc/config.php
+fi
