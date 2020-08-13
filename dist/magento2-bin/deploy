@@ -1,58 +1,41 @@
 #!/usr/bin/env bash
 
-# We want to work on the project root directory
+# Switch to the project root directory
 DIR="$(cd "$(dirname "$0")" && pwd)"
 cd ${DIR}/../
 
+# Create MAGENTO_CLOUD_ROUTES variable
 if [ ! -z "${PROJECT}" ] && [ ! -z "${ENVIRONMENT}" ] && [ ! -z "${SITE_URL}" ]; then
     export PROJECT_DOMAIN="${PROJECT}-${ENVIRONMENT}.${SITE_URL}"
 fi
+if [ -z "${MAGENTO_CLOUD_ROUTES}" ]; then
+    [[ -z "${PROJECT_DOMAIN}" ]] && { echo "ERROR: Environment variable PROJECT_DOMAIN must not be empty."; exit 1; }
+    export MAGENTO_CLOUD_ROUTES="$(vendor/bin/ece-tools-get-cloud-routes)"
+fi
 
-[[ -z "${PROJECT_DOMAIN}" ]] && { echo "ERROR: Environment variable PROJECT_DOMAIN must not be empty."; exit 1; }
+# Ensure mandatory environment variables exist
+[[ -z "${MAGENTO_CLOUD_ROUTES}" ]] && { echo "ERROR: Environment variable MAGENTO_CLOUD_ROUTES must not be empty."; exit 1; }
 [[ -z "${MAGENTO_CLOUD_VARIABLES}" ]] && { echo "ERROR: Environment variable MAGENTO_CLOUD_VARIABLES must not be empty."; exit 1; }
 [[ -z "${MAGENTO_CLOUD_RELATIONSHIPS}" ]] && { echo "ERROR: Environment variable MAGENTO_CLOUD_RELATIONSHIPS must not be empty."; exit 1; }
 
-### As we use the previous env variable here we can not put both in one line
-export MAGENTO_CLOUD_ROUTES="$(vendor/bin/ece-tools-get-cloud-routes)"
-
-# If we have the environment variables we need, run deployment.
-if [ ! -z "${MAGENTO_CLOUD_VARIABLES}" ] && [ ! -z "${MAGENTO_CLOUD_RELATIONSHIPS}" ]; then
-
-    # Set fixed install date
-    cat > app/etc/env.php << "SET_INSTALL_DATE"
-<?php
-return [
-    'MAGE_MODE' => 'production',
-    'cache_types' => [
-        'compiled_config' => 1
-    ],
-    'install' => [
-        'date' => 'Tue, 17 Nov 2015 20:16:00 +0000'
-    ],
-    'http_cache_hosts' => [
-        [
-            'host' => 'varnish'
-        ]
-    ]
-];
-SET_INSTALL_DATE
-
-    # Run deployment
-    if [ ! -z "${DEVELOPMENT_ENV}" ] || [[ ! $(hostname -s) =~ ^(magento|cronjob) ]]; then
-      vendor/bin/ece-tools deploy
-    elif [[ $(hostname -s) =~ ^magento ]]; then
-      vendor/bin/ece-tools run scenario/deploy.xml vendor/phoenix-media/magento2-ece-tools/scenario/deploy/custom-mode-config.xml vendor/phoenix/magento2-ece-tools/scenario/deploy/no-upgrade.xml
-    elif [[ $(hostname -s) =~ ^cronjob ]]; then
-      vendor/bin/ece-tools run scenario/deploy.xml vendor/phoenix-media/magento2-ece-tools/scenario/deploy/custom-mode-config.xml
-    fi
-
-    # Exit when the deployment failed
-    rc=$?;
-    if [[ $rc != 0 ]]; then
-        echo "Deployment failed. Exiting."
-        exit
-    fi
+# Run ece-tools deployment with appropriate scenario
+if [ ! -z "${DEVELOPMENT_ENV}" ] || [[ ! $(hostname -s) =~ ^(magento|cronjob) ]]; then
+    vendor/bin/ece-tools deploy
+elif [[ $(hostname -s) =~ ^magento ]]; then
+    vendor/bin/ece-tools run scenario/deploy.xml vendor/phoenix-media/magento2-ece-tools/scenario/deploy/custom-mode-config.xml vendor/phoenix/magento2-ece-tools/scenario/deploy/no-upgrade.xml
+elif [[ $(hostname -s) =~ ^cronjob ]]; then
+    vendor/bin/ece-tools run scenario/deploy.xml vendor/phoenix-media/magento2-ece-tools/scenario/deploy/custom-mode-config.xml
 fi
+
+# Exit when the deployment failed
+rc=$?;
+if [[ $rc != 0 ]]; then
+    echo "Deployment failed. Exiting."
+    exit
+fi
+
+# Enabled varnish as http hosts
+bin/magento setup:config:set --http-cache-hosts=varnish -n  && bin/magento app:config:import || exit 1
 
 # Must we install the sample data ?
 if [ ! -f var/.deployed-container ] && [ ! -z "${ADD_SAMPLE_DATA}" ] && [ ! -z "${COMPOSER_USER}" ] && [ ! -z "${COMPOSER_PASS}" ]; then
@@ -91,8 +74,6 @@ if [ ! -z "${DEVELOPMENT_ENV}" ]; then
     bin/magento deploy:mode:set developer || exit 1
     composer install --ignore-platform-reqs
 fi
-
-bin/magento cache:enable || exit 1
 
 ### We are ready now @see ReadinessProbe of Magento.yaml
 touch /tmp/deployed
