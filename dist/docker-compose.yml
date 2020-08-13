@@ -1,0 +1,72 @@
+###############################################################################
+#                   Phoenix Media - Docker testing environment                #
+###############################################################################
+
+version: '2.3'
+
+services:
+    magento:
+      build: .
+      container_name: magento
+      links:
+        - mysql:mysql
+        - redis:redis
+        - elasticsearch:elasticsearch
+        - rabbitmq:rabbitmq
+      ports:
+        - "80:80"
+      depends_on:
+        elasticsearch:
+          condition: service_healthy
+      environment:
+        - "MAGENTO_CLOUD_ROUTES=eyJodHRwOlwvXC9sb2NhbGhvc3RcLyI6eyJ0eXBlIjoidXBzdHJlYW0iLCJvcmlnaW5hbF91cmwiOiIifX0="
+        - "MAGENTO_CLOUD_VARIABLES=eyJBRE1JTl9GSVJTVE5BTUUiOiJZb3VyIEZpcnN0bmFtZSIsIkFETUlOX0xBU1ROQU1FIjoiWW91ciBMYXN0bmFtZSIsIkFETUlOX0VNQUlMIjoiYWNjb3VudEBtYWlsLmNvbSIsIkFETUlOX1VTRVJOQU1FIjoiYWRtaW5pc3RyYXRvciIsIkFETUlOX1BBU1NXT1JEIjoidG9wQFNlY3JlMSIsIkFETUlOX1VSTCI6ImFkbWluIiwiQ1JZUFRfS0VZIjoiNmZnMzdqYzUyOWUwZDlmMDY5NjY1Y2JjOWZlMTcwYjIifQ=="
+        - "MAGENTO_CLOUD_RELATIONSHIPS=eyJkYXRhYmFzZSI6W3siaG9zdCI6Im15c3FsIiwicGF0aCI6Im1hZ2VudG8iLCJwYXNzd29yZCI6InRvcFNlY3JldCIsInVzZXJuYW1lIjoibWFnZW50byIsInBvcnQiOiIzMzA2In1dLCJyZWRpcyI6W3siaG9zdCI6InJlZGlzIiwgInBvcnQiOiAiNjM3OSJ9XSwiZWxhc3RpY3NlYXJjaCI6W3siaG9zdCI6ImVsYXN0aWNzZWFyY2giLCAicG9ydCI6ICI5MjAwIiwgInNjaGVtZSI6Imh0dHAifV0sInJhYmJpdG1xIjpbeyJob3N0IjoicmFiYml0bXEiLCAidXNlcm5hbWUiOiJwaG9lbml4IiwgInBhc3N3b3JkIjoiTWFnZW50bzEyMyIsICJzY2hlbWUiOiJhbXFwIiwgInBvcnQiOiAiNTY3MiJ9XX0="
+      networks:
+        - internal
+      volumes:
+        - ./var:/var/www/html/var
+        - ~/.composer/auth.json:/var/www/html/auth.json
+
+    mysql:
+      image: mysql:5.7
+      container_name: mysql
+      environment:
+        - MYSQL_ROOT_PASSWORD=topSecret
+        - MYSQL_DATABASE=magento
+        - MYSQL_USER=magento
+        - MYSQL_PASSWORD=topSecret
+      networks:
+        - internal
+
+    redis:
+      image: redis
+      container_name: redis
+      networks:
+        - internal
+
+    elasticsearch:
+      image: elasticsearch:7.6.2
+      container_name: elasticsearch
+      environment:
+        - discovery.type=single-node
+      healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:9200"]
+        interval: 15s
+        timeout: 10s
+        retries: 10
+        start_period: 10s
+      networks:
+        - internal
+
+    rabbitmq:
+      image: rabbitmq
+      container_name: rabbitmq
+      environment:
+        - RABBITMQ_DEFAULT_USER=phoenix
+        - RABBITMQ_DEFAULT_PASS=Magento123
+      networks:
+        - internal
+networks:
+  internal:
+
