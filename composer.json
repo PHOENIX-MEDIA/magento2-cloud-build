@@ -7,7 +7,7 @@
         "OSL-3.0"
     ],
     "require": {
-        "phoenix-media/magento2-ece-tools": "~1.0.3"
+        "phoenix-media/magento2-ece-tools": ">=1.0.4"
     },
     "bin": [
         "bin/px-cloud-build-install"
