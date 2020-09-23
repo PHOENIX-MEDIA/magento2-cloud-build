@@ -14,4 +14,4 @@ COPY /helm/ /var/www/html/helm/
 
 ARG BUILD_NUMBER=0
 RUN echo "$(/usr/bin/envsubst < /etc/nginx/header_params)" > /etc/nginx/header_params \
-    && echo "$(/usr/bin/envsubst < /var/www/html/.magento.env.yaml)" > /var/www/html/.magento.env.yaml
+    && sed -i -e "s#id_prefix: \"cache_\"#id_prefix: \"${BUILD_NUMBER}_\"#g" /var/www/html/.magento.env.yaml
