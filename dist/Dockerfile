@@ -1,4 +1,4 @@
-FROM phoenixmedia/nginx-php:7.3
+FROM phoenixmedia/nginx-php:7.4
 
 COPY /docker/conf/php/php.ini /etc/php7/php.ini
 COPY --chown=nginx:nginx src/ /var/www/html/
