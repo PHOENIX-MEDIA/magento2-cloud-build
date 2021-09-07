@@ -71,8 +71,17 @@ fi
 
 if [ ! -z "${DEVELOPMENT_ENV}" ]; then
     export COMPOSER_NO_INTERACTION=1 COMPOSER_CACHE_DIR="/var/www/html/var/composer_home"
-    bin/magento deploy:mode:set developer || exit 1
     composer install --ignore-platform-reqs
+
+    # Setup of the Two factor auth can not be disabled via admin as the first login will trigger sending an email for setup.
+    bin/magento module:disable Magento_TwoFactorAuth
+
+    bin/magento deploy:mode:set developer || exit 1
+fi
+
+if [ ! -z "${DISABLE_TWO_FACTOR}" ]; then
+    # Setup of the Two factor auth can not be disabled via admin as the first login will trigger sending an email for setup.
+    bin/magento module:disable Magento_TwoFactorAuth
 fi
 
 ### We are ready now @see ReadinessProbe of Magento.yaml
