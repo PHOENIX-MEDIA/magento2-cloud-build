@@ -36,6 +36,8 @@ services:
         - MYSQL_DATABASE=magento
         - MYSQL_USER=magento
         - MYSQL_PASSWORD=topSecret
+      cap_add:
+        - SYS_NICE
       networks:
         - internal
 
