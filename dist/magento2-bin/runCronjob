@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
 
 sh /setup.sh && /usr/sbin/postfix start
+
+while [ ! -f /tmp/deployed ]
+do
+  sleep 2
+done
+
 /usr/sbin/crond -f -d 0

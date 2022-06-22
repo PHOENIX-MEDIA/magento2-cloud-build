@@ -31,7 +31,7 @@ return [
             [
                 'group_id' => '1',
                 'website_id' => '1',
-                'name' => 'Main Store',
+                'name' => 'Main Website Store',
                 'root_category_id' => '2',
                 'default_store_id' => '1',
                 'code' => 'main_website_store'
@@ -52,7 +52,7 @@ return [
                 'code' => 'default',
                 'website_id' => '1',
                 'group_id' => '1',
-                'name' => 'Main',
+                'name' => 'Default Store View',
                 'sort_order' => '0',
                 'is_active' => '1'
             ]
@@ -93,7 +93,7 @@ return [
                     'use_css_critical_path' => '0'
                 ]
             ]
-        ],
+        ]
     ],
     'admin_user' => [
         'locale' => [
