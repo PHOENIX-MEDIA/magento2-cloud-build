@@ -13,6 +13,7 @@ fi
 
 mkdir ${INSTALL_DIR}/helm || true
 mkdir ${MAGENTO_ROOT}/m2-hotfixes || true
+cp -a ${DIST_DIR}/m2-hotfixes/* ${MAGENTO_ROOT}/m2-hotfixes/
 chmod a+x ${DIST_DIR}/bin/* ${DIST_DIR}/magento2-bin/*
 cp -a ${DIST_DIR}/bin ${DIST_DIR}/docker ${INSTALL_DIR}${INSTALL_DIR_SUFFIX}/
 cp ${DIST_DIR}/.gitignore ${DIST_DIR}/.dockerignore ${DIST_DIR}/Dockerfile ${DIST_DIR}/docker-compose.yml ${INSTALL_DIR}/
