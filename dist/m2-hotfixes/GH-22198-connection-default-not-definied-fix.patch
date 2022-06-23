@@ -1,0 +1,17 @@
+diff --git a/vendor/magento/module-message-queue/Model/Plugin/ResourceModel/Lock.php b/vendor/magento/module-message-queue/Model/Plugin/ResourceModel/Lock.php
+--- a/vendor/magento/module-message-queue/Model/Plugin/ResourceModel/Lock.php
++++ b/vendor/magento/module-message-queue/Model/Plugin/ResourceModel/Lock.php
+@@ -36,7 +36,11 @@ class Lock
+     public function afterSet(\Magento\Framework\App\MaintenanceMode $subject, $result)
+     {
+         if (!$subject->isOn() && $result) {
+-            $this->lock->releaseOutdatedLocks();
++            try {
++                $this->lock->releaseOutdatedLocks();
++            } catch (\DomainException $e) {
++                // during installation it is okay to fail as not outdated locks exists in a fresh DB
++            }
+         }
+     }
+ }
+
