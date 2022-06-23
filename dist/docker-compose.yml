@@ -55,6 +55,8 @@ services:
       container_name: elasticsearch
       environment:
         - discovery.type=single-node
+        - xpack.security.enabled=false
+        - xpack.watcher.enabled=false
       healthcheck:
         test: ["CMD", "curl", "-f", "http://localhost:9200"]
         interval: 5s
