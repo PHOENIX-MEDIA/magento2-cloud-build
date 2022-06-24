@@ -6,7 +6,7 @@ INSTALL_DIR=$MAGENTO_ROOT
 INSTALL_DIR_SUFFIX="/dev"
 DIST_DIR="vendor/phoenix-media/magento2-cloud-build/dist"
 
-if [ $(basename $MAGENTO_ROOT) == "src" ];then
+if test $(basename ${MAGENTO_ROOT}) = "src"; then
     INSTALL_DIR="$(cd .. && pwd)"
     INSTALL_DIR_SUFFIX=""
 fi
