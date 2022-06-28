@@ -39,16 +39,15 @@ echo "Configuring Varnish host..."
 bin/magento setup:config:set --http-cache-hosts=varnish --allow-parallel-generation -n  && bin/magento app:config:import --no-interaction || exit 1
 
 # Must we install the sample data ?
-if [[ ! -f var/.deployed-container ]] && [[ ! -z "${ADD_SAMPLE_DATA}" ]] && [[ "${ADD_SAMPLE_DATA}" == "true" ]]; then
+if [[ ! -f var/.magento-installed ]] && [[ ! -z "${ADD_SAMPLE_DATA}" ]] && [[ "${ADD_SAMPLE_DATA}" == "true" ]]; then
     export COMPOSER_NO_INTERACTION=1 COMPOSER_CACHE_DIR="/tmp/composer"
 
     echo "Installing sample data..."
     bin/magento sampledata:deploy
     bin/magento setup:upgrade || exit 1
-
-    ### We dont want to install sample data again as in the demo projects the ENV variable is always set
-    touch var/.deployed-container
 fi
+
+touch var/.magento-installed || true
 
 if [ ! -z "${DEVELOPMENT_ENV}" ]; then
     echo "Enabling developer mode..."
