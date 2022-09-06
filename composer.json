@@ -2,7 +2,7 @@
     "name": "phoenix-media/magento2-cloud-build",
     "description": "Dockerfile, configurations and scripts to build Magento2 Docker images.",
     "type": "library",
-    "version": "1.0.20",
+    "version": "1.0.20-patch1",
     "license": [
         "OSL-3.0"
     ],
