@@ -21,6 +21,7 @@ cp -a ${DIST_DIR}/magento-vars.php ${DIST_DIR}/helm ${MAGENTO_ROOT}/
 cp -a ${DIST_DIR}/../../magento2-ece-tools/dist/.magento.env.yaml ${MAGENTO_ROOT}/
 cp -a ${DIST_DIR}/magento2-bin/* ${MAGENTO_ROOT}/bin/
 cp -a ${DIST_DIR}/helm/* ${INSTALL_DIR}/helm/
+cd ${MAGENTO_ROOT}; vendor/bin/composer config apcu-autoloader true; cd ${INSTALL_DIR}
 
 if [ ! -f ${MAGENTO_ROOT}/app/etc/config.php ]; then
     cp -a ${DIST_DIR}/config.php ${MAGENTO_ROOT}/app/etc/config.php
