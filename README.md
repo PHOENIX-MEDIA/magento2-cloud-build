@@ -1,7 +1,7 @@
 # PHOENIX MEDIA Magento2 Cloud Build
 
 ## Purpose
-Dockerfile, configurations and scripts to build Magento2 Docker images.
+Dockerfile, configurations and scripts to build Magento2 Docker images. The scripts in this repository allow to execute the steps described in the [Running Magento2 in Kubernetes Part 2 article on Medium](https://medium.com/swlh/running-magento2-in-kubernetes-part-2-building-the-docker-image-8516c0ed7d48).
 
 ## Installation
 The binary installs the files in the dist folder to the appropriate location within the composer installation.
