@@ -1,6 +1,6 @@
 FROM phoenixmedia/nginx-php:8.2
 
-COPY /docker/conf/php/php.ini /etc/php81/php.ini
+COPY /docker/conf/php/php.ini /etc/php82/php.ini
 COPY --chown=nginx:nginx src/ /var/www/html/
 
 RUN su -s /bin/bash nginx -c "/var/www/html/vendor/bin/ece-tools build:generate" && rm -Rf /var/www/html/var/view_preprocessed && rm -f app/etc/env.php
