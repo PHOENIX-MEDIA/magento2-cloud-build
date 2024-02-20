@@ -1,6 +1,6 @@
 #!/bin/sh
 
-MAGENTO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+MAGENTO_ROOT=${0%/vendor/*}
 MAGENTO_ROOT_DIR_NAME="$(basename $MAGENTO_ROOT)"
 INSTALL_DIR=$MAGENTO_ROOT
 INSTALL_DIR_SUFFIX="/dev"
