@@ -5,6 +5,7 @@
 /.settings
 atlassian*
 /nbproject
+/src/.gitignore
 /src/sitemap
 /src/sitemap.xml
 /.idea
@@ -64,8 +65,8 @@ atlassian*
 
 /.env
 /.docker-sync
-/.vagrant
 /.github
+/.composer
 
 /src/supervisord.*
 /src/.static_content_deploy
