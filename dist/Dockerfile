@@ -1,4 +1,4 @@
-FROM phoenixmedia/nginx-php:8.1
+FROM phoenixmedia/nginx-php:8.2
 
 COPY /docker/conf/php/php.ini /etc/php81/php.ini
 COPY --chown=nginx:nginx src/ /var/www/html/
