@@ -18,12 +18,24 @@ fi
 [[ -z "${MAGENTO_CLOUD_VARIABLES}" ]] && { echo "ERROR: Environment variable MAGENTO_CLOUD_VARIABLES must not be empty."; exit 1; }
 [[ -z "${MAGENTO_CLOUD_RELATIONSHIPS}" ]] && { echo "ERROR: Environment variable MAGENTO_CLOUD_RELATIONSHIPS must not be empty."; exit 1; }
 
+install_sample_data()
+{
+    if [[ ! -f var/.magento-installed ]] && [[ -n "${ADD_SAMPLE_DATA}" ]] && [[ "${ADD_SAMPLE_DATA}" == "true" ]]; then
+        export COMPOSER_NO_INTERACTION=1 COMPOSER_CACHE_DIR="/tmp/composer"
+
+        echo "Installing sample data..."
+        bin/magento sampledata:deploy
+    fi
+}
+
 # Run ece-tools deployment with appropriate scenario
 if [ ! -z "${DEVELOPMENT_ENV}" ] || [[ ! $(hostname -s) =~ ^(magento|cronjob) ]]; then
+    install_sample_data
     vendor/bin/ece-tools deploy
 elif [[ $(hostname -s) =~ ^magento ]]; then
     vendor/bin/ece-tools run scenario/deploy.xml vendor/phoenix-media/magento2-ece-tools/scenario/deploy/custom-mode-config.xml vendor/phoenix-media/magento2-ece-tools/scenario/deploy/no-upgrade.xml
 elif [[ $(hostname -s) =~ ^cronjob ]]; then
+    install_sample_data
     vendor/bin/ece-tools run scenario/deploy.xml vendor/phoenix-media/magento2-ece-tools/scenario/deploy/custom-mode-config.xml
 fi
 
@@ -37,15 +49,6 @@ fi
 # Enabled varnish as http hosts and workaround to preserve cache settings.
 echo "Configuring Varnish host..."
 bin/magento setup:config:set --http-cache-hosts=varnish --allow-parallel-generation -n  && bin/magento app:config:import --no-interaction || exit 1
-
-# Must we install the sample data ?
-if [[ ! -f var/.magento-installed ]] && [[ ! -z "${ADD_SAMPLE_DATA}" ]] && [[ "${ADD_SAMPLE_DATA}" == "true" ]]; then
-    export COMPOSER_NO_INTERACTION=1 COMPOSER_CACHE_DIR="/tmp/composer"
-
-    echo "Installing sample data..."
-    bin/magento sampledata:deploy
-    bin/magento setup:upgrade || exit 1
-fi
 
 touch var/.magento-installed || true
 
