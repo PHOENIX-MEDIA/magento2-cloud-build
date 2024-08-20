@@ -8,7 +8,7 @@
     ],
     "require": {
         "phoenix-media/magento2-ece-tools": ">=1.0.9",
-        "magento/magento2-base": ">=2.4.5 <2.4.7"
+        "magento/magento2-base": ">=2.4.5 <2.4.8"
     },
     "bin": [
         "bin/px-cloud-build-install"
