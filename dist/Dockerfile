@@ -1,4 +1,4 @@
-FROM phoenixmedia/nginx-php:8.3
+FROM phoenixmedia/nginx-php:8.4
 
 COPY /docker/conf/php/magento.ini /usr/local/etc/php/conf.d/
 COPY --chown=nginx:nginx src/ /var/www/html/

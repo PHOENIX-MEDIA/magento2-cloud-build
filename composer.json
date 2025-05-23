@@ -2,13 +2,13 @@
     "name": "phoenix-media/magento2-cloud-build",
     "description": "Dockerfile, configurations and scripts to build Magento2 Docker images.",
     "type": "library",
-    "version": "1.0.49",
+    "version": "1.0.50",
     "license": [
         "OSL-3.0"
     ],
     "require": {
         "phoenix-media/magento2-ece-tools": ">=1.1.0",
-        "magento/magento2-base": ">=2.4.7 <2.4.8"
+        "magento/magento2-base": ">=2.4.8 <2.4.9"
     },
     "bin": [
         "bin/px-cloud-build-install"
